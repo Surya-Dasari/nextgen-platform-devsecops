@@ -17,3 +17,214 @@ target/
 # Env
 .env
 
+# ==============================
+# DevSecOps Public Repo Hygiene
+# ==============================
+
+# Environment files
+.env
+.env.*
+
+# Secrets & Keys
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Kubernetes
+kubeconfig
+config.yaml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log# ==============================
+# DevSecOps Public Repo Hygiene
+# ==============================
+
+# Environment files
+.env
+.env.*
+
+# Secrets & Keys
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Kubernetes
+kubeconfig
+config.yaml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# ==============================
+# DevSecOps Public Repo Hygiene
+# ==============================
+
+# Environment files
+.env
+.env.*
+
+# Secrets & Keys
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Kubernetes
+kubeconfig
+config.yaml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+# ==============================
+# DevSecOps Public Repo Hygiene
+# ==============================
+
+# Environment files
+.env
+.env.*
+
+# Secrets & Keys
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Kubernetes
+kubeconfig
+config.yaml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+# ==============================
+# DevSecOps Public Repo Hygiene
+# ==============================
+
+# Environment files
+.env
+.env.*
+
+# Secrets & Keys
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Kubernetes
+kubeconfig
+config.yaml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+# ==============================
+# DevSecOps Public Repo Hygiene
+# ==============================
+
+# Environment files
+.env
+.env.*
+
+# Secrets & Keys
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+
+# Kubernetes
+kubeconfig
+config.yaml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
