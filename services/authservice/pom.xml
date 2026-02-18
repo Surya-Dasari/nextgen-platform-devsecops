@@ -5,18 +5,16 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Inherit version from parent -->
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.1</version>
-        <relativePath/>
+        <groupId>com.example</groupId>
+        <artifactId>nextgen-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.example</groupId>
     <artifactId>authservice</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>authservice</name>
-    <description>Nextgen Microservice</description>
+    <name>Authentication Service</name>
 
     <properties>
         <java.version>17</java.version>
@@ -30,10 +28,37 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- Actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Prometheus -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <!-- Testing -->
@@ -77,18 +102,6 @@
 
         </plugins>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>nextgen-maven-releases</id>
-            <url>http://localhost:8081/repository/nextgen-maven-releases/</url>
-        </repository>
-
-        <snapshotRepository>
-            <id>nextgen-maven-snapshots</id>
-            <url>http://localhost:8081/repository/nextgen-maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
 </project>
 
