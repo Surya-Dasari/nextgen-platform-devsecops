@@ -3,80 +3,92 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.1</version>
-  </parent>
-
-  <groupId>com.example</groupId>
-  <artifactId>userservice</artifactId>
-  <version>0.0.1</version>
-  <name>userservice</name>
-
-  <properties>
-    <java.version>17</java.version>
-  </properties>
-
-  <dependencies>
-
-    <!-- Spring Web -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <!-- Spring JPA -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-
-    <!-- PostgreSQL -->
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-     <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-
-<dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-registry-prometheus</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-crypto</artifactId>
-</dependency>
-
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
+    <parent>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
-<distributionManagement>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.1</version>
+        <relativePath/>
+    </parent>
 
-  <repository>
-    <id>nexus-releases</id>
-    <url>http://localhost:8081/repository/nextgen-maven-releases/</url>
-  </repository>
+    <groupId>com.example</groupId>
+    <artifactId>userservice</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>userservice</name>
+    <description>Nextgen Microservice</description>
 
-  <snapshotRepository>
-    <id>nexus-snapshots</id>
-    <url>http://localhost:8081/repository/nextgen-maven-snapshots/</url>
-  </snapshotRepository>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
 
-</distributionManagement>
+    <dependencies>
+
+        <!-- Spring Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!-- Spring Boot Plugin -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- JaCoCo Plugin -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.10</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>nextgen-maven-releases</id>
+            <url>http://localhost:8081/repository/nextgen-maven-releases/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>nextgen-maven-snapshots</id>
+            <url>http://localhost:8081/repository/nextgen-maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
 

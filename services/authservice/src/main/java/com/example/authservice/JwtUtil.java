@@ -21,4 +21,17 @@ public class JwtUtil {
                 )
                 .compact();
     }
+
+    public static boolean isTokenValid(String token) {
+        if (token == null) {
+            return false;
+        }
+
+        if (token.length() < 10) {
+            return false;
+        }
+
+        return true;
+    }
 }
+

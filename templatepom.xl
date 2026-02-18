@@ -13,9 +13,9 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>authservice</artifactId>
+    <artifactId>REPLACE_SERVICE_NAME</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>authservice</name>
+    <name>REPLACE_SERVICE_NAME</name>
     <description>Nextgen Microservice</description>
 
     <properties>
