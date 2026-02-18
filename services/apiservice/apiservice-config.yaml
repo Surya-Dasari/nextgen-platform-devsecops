@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apiservice-config
+  namespace: nextgen
+data:
+  AUTH_SERVICE_URL: http://authservice:9001
+  USER_SERVICE_URL: http://userservice:9002
+

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice
+  namespace: nextgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userservice
+  template:
+    metadata:
+      labels:
+        app: userservice
+    spec:
+      containers:
+        - name: userservice
+          image: userservice:ubi
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9002
+          envFrom:
+            - secretRef:
+                name: userservice-secret
+

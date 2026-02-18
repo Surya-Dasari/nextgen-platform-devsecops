@@ -1,14 +1,23 @@
+# ---------- Base Image ----------
 FROM registry.access.redhat.com/ubi9/nodejs-18
 
-WORKDIR /opt/app-root/src
+WORKDIR /app
 
-COPY package.json ./
-RUN npm install --omit=dev
+# Copy package files first
+COPY services/frontend/package.json .
 
-COPY . .
+# Install dependencies
+RUN npm install
 
-ENV PORT=9080
+# Copy application code
+COPY services/frontend .
+
+# Expose port
 EXPOSE 9080
 
-CMD ["npm", "start"]
+# OpenShift compatibility
+USER 1001
+
+# Start application
+CMD ["node", "server.js"]
 
