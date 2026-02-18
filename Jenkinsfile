@@ -28,29 +28,31 @@ pipeline {
             }
         }
 
-        stage('Build Userservice') {
-            steps {
-                echo "Building userservice..."
-                dir('services/userservice') {
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
-        }
+        stage('Build Services') {
+            parallel {
 
-        stage('Build Authservice') {
-            steps {
-                echo "Building authservice..."
-                dir('services/authservice') {
-                    sh 'mvn clean package -DskipTests'
+                stage('Build Userservice') {
+                    steps {
+                        dir('services/userservice') {
+                            sh 'mvn clean package'
+                        }
+                    }
                 }
-            }
-        }
 
-        stage('Build Apiservice') {
-            steps {
-                echo "Building apiservice..."
-                dir('services/apiservice') {
-                    sh 'mvn clean package -DskipTests'
+                stage('Build Authservice') {
+                    steps {
+                        dir('services/authservice') {
+                            sh 'mvn clean package'
+                        }
+                    }
+                }
+
+                stage('Build Apiservice') {
+                    steps {
+                        dir('services/apiservice') {
+                            sh 'mvn clean package'
+                        }
+                    }
                 }
             }
         }
@@ -62,6 +64,9 @@ pipeline {
         }
         failure {
             echo "Pipeline failed."
+        }
+        always {
+            cleanWs()
         }
     }
 }
