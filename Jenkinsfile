@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'OpenJDK17'
-        maven 'Maven3'
-    }
-
     environment {
         APP_NAME = "nextgen-platform"
     }
