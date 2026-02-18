@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         SONAR_SERVER = 'SonarServer'
+        DOCKER_REGISTRY = 'suryadasari31'
     }
 
     stages {
@@ -26,15 +27,36 @@ pipeline {
 
         stage('Set Version') {
             steps {
+                sh 'chmod +x scripts/set_version.sh'
                 sh './scripts/set_version.sh'
+            }
+        }
+
+        stage('Read Version & Git SHA') {
+            steps {
+                script {
+                    env.APP_VERSION = sh(
+                        script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout",
+                        returnStdout: true
+                    ).trim()
+
+                    env.GIT_SHA = sh(
+                        script: "git rev-parse --short HEAD",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Version: ${APP_VERSION}"
+                    echo "Git SHA: ${GIT_SHA}"
+                }
             }
         }
 
         stage('Build & Unit Test') {
             steps {
-                sh 'mvn clean verify'
+                sh 'mvn clean verify -T 1C'
             }
         }
+
 
         stage('Sonar Scan') {
             steps {
@@ -46,25 +68,90 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        stage('Deploy Artifact') {
+        stage('Deploy To Nexus') {
             steps {
                 sh 'mvn deploy -DskipTests'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    def services = ["authservice", "userservice", "apiservice", "frontend"]
+
+                    for (svc in services) {
+                        sh """
+                        docker build -t ${DOCKER_REGISTRY}/${svc}:${APP_VERSION} \
+                                     -t ${DOCKER_REGISTRY}/${svc}:${GIT_SHA} \
+                                     services/${svc}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                script {
+                    def services = ["authservice", "userservice", "apiservice", "frontend"]
+
+                    for (svc in services) {
+                        sh """
+                        trivy image --exit-code 1 --severity HIGH,CRITICAL \
+                        ${DOCKER_REGISTRY}/${svc}:${APP_VERSION}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+
+                    script {
+                        def services = ["authservice", "userservice", "apiservice", "frontend"]
+
+                        for (svc in services) {
+                            sh "docker push ${DOCKER_REGISTRY}/${svc}:${APP_VERSION}"
+                            sh "docker push ${DOCKER_REGISTRY}/${svc}:${GIT_SHA}"
+                        }
+
+                        if (env.BRANCH_NAME == "dev") {
+                            for (svc in services) {
+                                sh """
+                                docker tag ${DOCKER_REGISTRY}/${svc}:${APP_VERSION} \
+                                           ${DOCKER_REGISTRY}/${svc}:latest
+                                docker push ${DOCKER_REGISTRY}/${svc}:latest
+                                """
+                            }
+                        }
+                    }
+
+                    sh "docker logout"
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully.'
+            echo "Secure CI completed successfully for ${APP_VERSION}"
         }
         failure {
-            echo 'Pipeline failed.'
+            echo "Pipeline failed due to security or build errors."
         }
     }
 }
