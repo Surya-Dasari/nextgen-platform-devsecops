@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: authservice
-          image: suryadasari31/authservice:1.0.1
+          image: suryadasari31/authservice:1.0.2
           imagePullPolicy: Always
           ports:
             - containerPort: 9001
