@@ -13,6 +13,6 @@ USER 1001
 
 EXPOSE 9001
 
-ENV JAVA_OPTS="--add-opens=java.base/java.io=ALL-UNNAMED"
+ENV _JAVA_OPTIONS="--add-opens=java.base/java.io=ALL-UNNAMED"
 CMD ["java","-jar","app.jar"]
 
