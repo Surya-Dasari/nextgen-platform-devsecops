@@ -13,5 +13,5 @@ USER 1001
 
 EXPOSE 9001
 
-CMD ["java", "-jar", "app.jar"]
+CMD ["java","--add-opens","java.base/java.io=ALL-UNNAMED","-jar","app.jar"]
 
