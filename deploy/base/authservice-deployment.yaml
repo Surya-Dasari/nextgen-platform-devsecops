@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice
+  namespace: nextgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authservice
+  template:
+    metadata:
+      labels:
+        app: authservice
+    spec:
+      containers:
+        - name: authservice
+          image: suryadasari31/authservice:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9001
+          envFrom:
+            - configMapRef:
+                name: authservice-config
+            - secretRef:
+                name: authservice-secret
+
