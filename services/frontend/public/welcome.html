@@ -3,22 +3,200 @@
 <head>
   <title>Welcome</title>
   <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      color: #333;
+    }
+
+    .card {
+      background: white;
+      padding: 40px;
+      width: 480px;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .subtitle {
+      margin-top: 10px;
+      color: #555;
+      font-size: 15px;
+    }
+
+    /* Cartoon */
+    .funny-face {
+      margin-top: 40px;
+      animation: bounce 2s infinite;
+    }
+
+    .face {
+      width: 150px;
+      height: 150px;
+      background: #FFDD59;
+      border-radius: 50%;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .eyes {
+      display: flex;
+      justify-content: space-around;
+      padding-top: 55px;
+    }
+
+    .eye {
+      width: 22px;
+      height: 22px;
+      background: black;
+      border-radius: 50%;
+      animation: blink 5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 96%, 100% { height: 22px; }
+      98% { height: 3px; }
+    }
+
+    .smile {
+      width: 80px;
+      height: 45px;
+      border-bottom: 7px solid black;
+      border-radius: 0 0 50px 50px;
+      margin: 25px auto 0;
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: red;
+      top: -10px;
+      animation: fall 3s linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(360deg);
+      }
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Buttons */
+    .btn-container {
+      margin-top: 25px;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      margin: 8px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s ease;
+    }
+
+    .logout {
+      background: #ff4757;
+      color: white;
+    }
+
+    .logout:hover {
+      background: #c0392b;
+    }
+
+    .dashboard {
+      background: #1e90ff;
+      color: white;
+    }
+
+    .dashboard:hover {
+      background: #0652DD;
+    }
+
+  </style>
+
 </head>
 <body>
 
-<div class="card">
-  <h1 id="welcome"></h1>
-  <p class="subtitle">You are logged in successfully 🎉</p>
-</div>
+  <div class="card">
+    <h1 id="welcome"></h1>
+    <p class="subtitle">You are officially inside the system 🚀</p>
 
-<script>
-  const token = localStorage.getItem("token");
-  if (!token) location.href = "index.html";
+    <div class="btn-container">
+      <button class="btn dashboard" onclick="goDashboard()">Dashboard</button>
+      <button class="btn logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
 
-  const payload = JSON.parse(atob(token.split(".")[1]));
-  document.getElementById("welcome").innerText =
-    `Hey ${payload.sub}, welcome to NextGen Platform 🚀`;
-</script>
+  <div class="funny-face">
+    <div class="face">
+      <div class="eyes">
+        <div class="eye"></div>
+        <div class="eye"></div>
+      </div>
+      <div class="smile"></div>
+    </div>
+    <h2>Well Well... Look Who Logged In 😏</h2>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      location.href = "index.html";
+    }
+
+    const payload = JSON.parse(atob(token.split(".")[1]));
+
+    document.getElementById("welcome").innerText =
+      `Welcome ${payload.sub}`;
+
+    function logout() {
+      localStorage.removeItem("token");
+      location.href = "index.html";
+    }
+
+    function goDashboard() {
+      alert("Dashboard coming soon!");
+    }
+
+    // Confetti generator
+    for (let i = 0; i < 40; i++) {
+      const confetti = document.createElement("div");
+      confetti.className = "confetti";
+      confetti.style.left = Math.random() * 100 + "vw";
+      confetti.style.background =
+        `hsl(${Math.random() * 360}, 100%, 50%)`;
+      confetti.style.animationDuration =
+        (2 + Math.random() * 3) + "s";
+      document.body.appendChild(confetti);
+    }
+  </script>
 
 </body>
 </html>

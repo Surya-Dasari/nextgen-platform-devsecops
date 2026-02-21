@@ -5,4 +5,4 @@ metadata:
   namespace: nextgen
 data:
   AUTHSERVICE_URL: "http://authservice:9001"
-
+  USERSERVICE_URL: "http://userservice:9002"

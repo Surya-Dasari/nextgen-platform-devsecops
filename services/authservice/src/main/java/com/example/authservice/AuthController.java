@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 @CrossOrigin
 public class AuthController {
 
-    @Value("${USERSERVICE_URL}")
+    @Value("${userservice.url}")
     private String userServiceUrl;
 
     private final RestTemplate rest = new RestTemplate();

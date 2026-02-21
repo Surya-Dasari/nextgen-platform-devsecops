@@ -16,10 +16,10 @@ public class ApiController {
 
     private final RestTemplate rest = new RestTemplate();
 
-    @Value("${AUTH_SERVICE_URL}")
+    @Value("${auth.url}")
     private String authServiceUrl;
 
-    @Value("${USER_SERVICE_URL}")
+    @Value("${user.url}")
     private String userServiceUrl;
 
     // ---------- SIGNUP ----------

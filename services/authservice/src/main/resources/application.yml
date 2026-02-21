@@ -2,7 +2,7 @@ server:
   port: ${SERVER_PORT:9001}
 
 userservice:
-  url: ${USER_SERVICE_URL:http://localhost:9002}
+  url: ${USERSERVICE_URL:http://localhost:9002}
 
 management:
   endpoints:

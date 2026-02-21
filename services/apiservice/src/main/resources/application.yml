@@ -2,10 +2,10 @@ server:
   port: ${SERVER_PORT:9000}
 
 auth:
-  url: ${AUTH_SERVICE_URL:http://localhost:9001}
+  url: ${AUTHSERVICE_URL:http://localhost:9001}
 
 user:
-  url: ${USER_SERVICE_URL:http://localhost:9002}
+  url: ${USERSERVICE_URL:http://localhost:9002}
 
 management:
   endpoints:
