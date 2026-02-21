@@ -57,7 +57,6 @@ pipeline {
             }
         }
 
-
         stage('Sonar Scan') {
             steps {
                 withSonarQubeEnv("${SONAR_SERVER}") {
@@ -144,15 +143,46 @@ pipeline {
                 }
             }
         }
+
+        // 🔥 NEW STAGE – GitOps Image Update
+        stage('Update Kubernetes Manifests (GitOps)') {
+            when {
+                branch 'dev'
+            }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-creds',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_TOKEN'
+                )]) {
+
+                    sh """
+                    set -e
+
+                    git config user.email "ci@jenkins"
+                    git config user.name "jenkins"
+
+                    sed -i 's|image: suryadasari31/apiservice:.*|image: suryadasari31/apiservice:${APP_VERSION}|' deploy/base/apiservice-deployment.yaml
+                    sed -i 's|image: suryadasari31/authservice:.*|image: suryadasari31/authservice:${APP_VERSION}|' deploy/base/authservice-deployment.yaml
+                    sed -i 's|image: suryadasari31/userservice:.*|image: suryadasari31/userservice:${APP_VERSION}|' deploy/base/userservice-deployment.yaml
+                    sed -i 's|image: suryadasari31/frontend:.*|image: suryadasari31/frontend:${APP_VERSION}|' deploy/base/frontend-deployment.yaml
+
+                    git add deploy/base/*.yaml
+                    git commit -m "Update image tags to ${APP_VERSION}" || echo "No changes to commit"
+
+                    git push https://\$GIT_USER:\$GIT_TOKEN@github.com/Surya-Dasari/nextgen-platform-devsecops.git HEAD:dev
+                    """
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo "Secure CI completed successfully for ${APP_VERSION}"
+            echo "Secure CI → GitOps → ArgoCD completed for ${APP_VERSION}"
         }
         failure {
             echo "Pipeline failed due to security or build errors."
         }
     }
 }
-
