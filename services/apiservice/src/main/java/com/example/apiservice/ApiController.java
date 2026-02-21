@@ -16,10 +16,10 @@ public class ApiController {
 
     private final RestTemplate rest = new RestTemplate();
 
-    @Value("${auth.url}")
+    @Value("${AUTH_SERVICE_URL}")
     private String authServiceUrl;
 
-    @Value("${user.url}")
+    @Value("${USER_SERVICE_URL}")
     private String userServiceUrl;
 
     // ---------- SIGNUP ----------
@@ -32,33 +32,34 @@ public class ApiController {
                     String.class
             );
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Signup failed");
-        }
+
+	  } catch (Exception e) {
+    e.printStackTrace();
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Signup failed: " + e.getMessage());
+}
     }
 
     // ---------- LOGIN (JWT PASS-THROUGH) ----------
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> body) {
+public ResponseEntity<String> login(@RequestBody User user) {
 
-        try {
-            // authservice now returns JWT directly
-            String token = rest.postForObject(
-                    authServiceUrl + "/login",
-                    body,
-                    String.class
-            );
+    try {
+        String token = rest.postForObject(
+                authServiceUrl + "/login",
+                user,
+                String.class
+        );
 
-            return ResponseEntity.ok(token);
+        return ResponseEntity.ok(token);
 
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid credentials");
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Login failed");
-        }
+    } catch (HttpClientErrorException | HttpServerErrorException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Invalid credentials");
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Login failed: " + ex.getMessage());
     }
 }
-
+}
