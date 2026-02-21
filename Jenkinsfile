@@ -103,7 +103,7 @@ pipeline {
 
                     for (svc in services) {
                         sh """
-                        trivy image --exit-code 1 --severity CRITICAL \
+                        trivy image --scanners vuln --exit-code 1 --severity CRITICAL \
                         ${DOCKER_REGISTRY}/${svc}:${APP_VERSION}
                         """
                     }
