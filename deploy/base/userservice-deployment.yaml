@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: userservice
-          image: suryadasari31/userservice:1.0.25-c025a79-SNAPSHOT
+          image: suryadasari31/userservice:1.0.26-e4dd27d-SNAPSHOT
           imagePullPolicy: Always
           ports:
             - containerPort: 9002
