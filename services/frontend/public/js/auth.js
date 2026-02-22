@@ -1,4 +1,4 @@
-const API = "http://localhost:9000";
+const API = "";
 
 function login() {
   fetch(`${API}/login`, {
