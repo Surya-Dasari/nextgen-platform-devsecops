@@ -13,7 +13,7 @@ resources:
   - apiservice-service.yaml
 
   - authservice-configmap.yaml
-  - authservice-secret.yaml
+  - authservice-sealed-secret.yaml
   - authservice-deployment.yaml
   - authservice-service.yaml
 
