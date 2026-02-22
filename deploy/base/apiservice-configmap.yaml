@@ -4,5 +4,5 @@ metadata:
   name: apiservice-config
   namespace: nextgen
 data:
-  AUTHSERVICE_URL: "http://authservice:9001"
-  USERSERVICE_URL: "http://userservice:9002"
+  AUTH_SERVICE_URL: "http://authservice:9001"
+  USER_SERVICE_URL: "http://userservice:9002"
