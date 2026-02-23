@@ -7,3 +7,5 @@ resources:
   - ../../base
   - namespace.yaml
   - nextgen-ingress.yaml
+  - postgres-sealed-secret.yaml
+  - authservice-sealed-secret.yaml
