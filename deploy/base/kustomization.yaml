@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - namespace.yaml
 
   - postgres-sealed-secret.yaml
   - postgres-service.yaml
@@ -24,4 +23,4 @@ resources:
   - frontend-deployment.yaml
   - frontend-service.yaml
 
-  - nextgen-ingress.yaml
+
