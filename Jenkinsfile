@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        PATH = "/usr/local/bin:/usr/bin:/bin:${env.PATH}"
         DOCKER_REPO = "docker.io/suryadasari31"
         IMAGE_TAG   = "${BUILD_NUMBER}"
         K8S_CONTEXT = "kind-devops-lab"
