@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/usr/local/bin:/usr/bin:/bin:${env.PATH}"
+        KUBECTL     = "/usr/local/bin/kubectl"
+        HELM        = "/usr/local/bin/helm"
         DOCKER_REPO = "docker.io/suryadasari31"
         IMAGE_TAG   = "${BUILD_NUMBER}"
         K8S_CONTEXT = "kind-devops-lab"
@@ -86,16 +87,16 @@ pipeline {
                 sh '''
                 set -e
 
-                kubectl config use-context $K8S_CONTEXT
+                $KUBECTL config use-context $K8S_CONTEXT
 
-                kubectl create namespace $MON_NS --dry-run=client -o yaml | kubectl apply -f -
+                $KUBECTL create namespace $MON_NS --dry-run=client -o yaml | $KUBECTL apply -f -
 
-                helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
-                helm repo add grafana https://grafana.github.io/helm-charts || true
-                helm repo update
+                $HELM repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+                $HELM repo add grafana https://grafana.github.io/helm-charts || true
+                $HELM repo update
 
-                helm upgrade --install monitoring prometheus-community/kube-prometheus-stack -n $MON_NS
-                helm upgrade --install loki grafana/loki-stack -n $MON_NS --set grafana.enabled=false
+                $HELM upgrade --install monitoring prometheus-community/kube-prometheus-stack -n $MON_NS
+                $HELM upgrade --install loki grafana/loki-stack -n $MON_NS --set grafana.enabled=false
                 '''
             }
         }
@@ -104,12 +105,12 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_WEBHOOK')]) {
                     sh '''
-                    kubectl create secret generic slack-webhook-secret \
+                    $KUBECTL create secret generic slack-webhook-secret \
                         --from-literal=slack_webhook=$SLACK_WEBHOOK \
-                        -n monitoring \
-                        --dry-run=client -o yaml | kubectl apply -f -
+                        -n $MON_NS \
+                        --dry-run=client -o yaml | $KUBECTL apply -f -
 
-                    kubectl apply -f observability/alertmanager-config.yaml
+                    $KUBECTL apply -f observability/alertmanager-config.yaml
                     '''
                 }
             }
@@ -120,9 +121,9 @@ pipeline {
                 sh '''
                 echo "Waiting for monitoring stack..."
 
-                kubectl wait --for=condition=Ready pod --all -n $MON_NS --timeout=300s
+                $KUBECTL wait --for=condition=Ready pod --all -n $MON_NS --timeout=300s
 
-                kubectl get pods -n $MON_NS
+                $KUBECTL get pods -n $MON_NS
                 '''
             }
         }
@@ -136,16 +137,16 @@ pipeline {
         stage('Deploy Application') {
             steps {
                 sh '''
-                kubectl config use-context $K8S_CONTEXT
+                $KUBECTL config use-context $K8S_CONTEXT
 
-                kubectl create namespace $APP_NS --dry-run=client -o yaml | kubectl apply -f -
+                $KUBECTL create namespace $APP_NS --dry-run=client -o yaml | $KUBECTL apply -f -
 
-                kubectl apply -n $APP_NS -f services/postgres/
+                $KUBECTL apply -n $APP_NS -f services/postgres/
 
-                ./scripts/render-manifest.sh services/apiservice/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
-                ./scripts/render-manifest.sh services/authservice/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
-                ./scripts/render-manifest.sh services/userservice/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
-                ./scripts/render-manifest.sh services/frontend/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/apiservice/k8s.yaml $IMAGE_TAG | $KUBECTL apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/authservice/k8s.yaml $IMAGE_TAG | $KUBECTL apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/userservice/k8s.yaml $IMAGE_TAG | $KUBECTL apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/frontend/k8s.yaml $IMAGE_TAG | $KUBECTL apply -n $APP_NS -f -
                 '''
             }
         }
