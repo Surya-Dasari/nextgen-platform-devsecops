@@ -4,8 +4,9 @@ pipeline {
     environment {
         DOCKER_REPO = "docker.io/suryadasari31"
         IMAGE_TAG   = "${BUILD_NUMBER}"
-        OCP_SERVER  = "https://api.rm2.thpm.p1.openshiftapps.com:6443"
-        OCP_PROJECT = "suryadasari31-dev"
+        K8S_CONTEXT = "kind-devops-lab"
+        APP_NS      = "nextgen"
+        MON_NS      = "monitoring"
     }
 
     options {
@@ -17,7 +18,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'kind-cluster-dev',
+                    url: 'https://github.com/Surya-Dasari/nextgen-platform-devsecops.git'
             }
         }
 
@@ -27,7 +29,7 @@ pipeline {
                 set -e
                 for svc in apiservice authservice userservice
                 do
-                  echo "🔧 Building $svc"
+                  echo "Building $svc"
                   cd services/$svc
                   mvn clean package -DskipTests
                   cd -
@@ -53,7 +55,6 @@ pipeline {
                 set -e
                 for svc in apiservice authservice userservice frontend
                 do
-                  echo "🐳 Building image for $svc"
                   docker build -t $DOCKER_REPO/nextgen-$svc:$IMAGE_TAG services/$svc
                 done
                 '''
@@ -68,8 +69,8 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
-                    set -e
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
                     for svc in apiservice authservice userservice frontend
                     do
                       docker push $DOCKER_REPO/nextgen-$svc:$IMAGE_TAG
@@ -79,58 +80,75 @@ pipeline {
             }
         }
 
-        stage('Prepare Secrets (Idempotent)') {
+        stage('Ensure Observability Stack') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'openshift-token', variable: 'OCP_TOKEN'),
-                    string(credentialsId: 'pg-db-user', variable: 'DB_USER'),
-                    string(credentialsId: 'pg-db-password', variable: 'DB_PASS'),
-                    string(credentialsId: 'pg-db-name', variable: 'DB_NAME')
-                ]) {
+                sh '''
+                set -e
+
+                kubectl config use-context $K8S_CONTEXT
+
+                kubectl create namespace $MON_NS --dry-run=client -o yaml | kubectl apply -f -
+
+                helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+                helm repo add grafana https://grafana.github.io/helm-charts || true
+                helm repo update
+
+                helm upgrade --install monitoring prometheus-community/kube-prometheus-stack -n $MON_NS
+                helm upgrade --install loki grafana/loki-stack -n $MON_NS --set grafana.enabled=false
+                '''
+            }
+        }
+
+        stage('Configure Slack Alerts') {
+            steps {
+                withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_WEBHOOK')]) {
                     sh '''
-                    set -e
-                    oc login --token=$OCP_TOKEN --server=$OCP_SERVER --insecure-skip-tls-verify=true
-                    oc project $OCP_PROJECT
+                    kubectl create secret generic slack-webhook-secret \
+                        --from-literal=slack_webhook=$SLACK_WEBHOOK \
+                        -n monitoring \
+                        --dry-run=client -o yaml | kubectl apply -f -
 
-                    oc get secret postgres-secret || \
-                    oc create secret generic postgres-secret \
-                      --from-literal=POSTGRES_USER=$DB_USER \
-                      --from-literal=POSTGRES_PASSWORD=$DB_PASS \
-                      --from-literal=POSTGRES_DB=$DB_NAME
-
-                    oc get secret userservice-db-secret || \
-                    oc create secret generic userservice-db-secret \
-                      --from-literal=SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/$DB_NAME \
-                      --from-literal=SPRING_DATASOURCE_USERNAME=$DB_USER \
-                      --from-literal=SPRING_DATASOURCE_PASSWORD=$DB_PASS
+                    kubectl apply -f observability/alertmanager-config.yaml
                     '''
                 }
             }
         }
 
+        stage('Wait for Monitoring Stack') {
+            steps {
+                sh '''
+                echo "Waiting for monitoring stack..."
+
+                kubectl wait --for=condition=Ready pod --all -n $MON_NS --timeout=300s
+
+                kubectl get pods -n $MON_NS
+                '''
+            }
+        }
+
         stage('Prepare Scripts') {
-    steps {
-        sh '''
-        chmod +x scripts/*.sh
-        '''
-    }
-}
+            steps {
+                sh 'chmod +x scripts/*.sh'
+            }
+        }
 
+        stage('Deploy Application') {
+            steps {
+                sh '''
+                kubectl config use-context $K8S_CONTEXT
 
-stage('Deploy to Kind') {
-    steps {
-        sh '''
-        kubectl config use-context kind-devops-lab
+                kubectl create namespace $APP_NS --dry-run=client -o yaml | kubectl apply -f -
 
-        kubectl apply -n nextgen -f services/postgres/
+                kubectl apply -n $APP_NS -f services/postgres/
 
-        ./scripts/render-manifest.sh services/apiservice/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
-        ./scripts/render-manifest.sh services/authservice/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
-        ./scripts/render-manifest.sh services/userservice/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
-        ./scripts/render-manifest.sh services/frontend/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
-        '''
-    }
-}
+                ./scripts/render-manifest.sh services/apiservice/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/authservice/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/userservice/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
+                ./scripts/render-manifest.sh services/frontend/k8s.yaml $IMAGE_TAG | kubectl apply -n $APP_NS -f -
+                '''
+            }
+        }
+
         stage('Verify Rollout') {
             steps {
                 sh '''
@@ -142,11 +160,10 @@ stage('Deploy to Kind') {
 
     post {
         success {
-            echo "✅ CI/CD SUCCESS – immutable rollout completed"
+            echo "CI/CD SUCCESS – Application deployed with monitoring and alerts"
         }
         failure {
-            echo "❌ CI/CD FAILED – check rollout or logs"
+            echo "CI/CD FAILED – Check Jenkins logs"
         }
     }
 }
-
