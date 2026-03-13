@@ -117,28 +117,20 @@ pipeline {
 }
 
 
-        stage('Deploy to OpenShift') {
-            steps {
-                withCredentials([string(
-                    credentialsId: 'openshift-token',
-                    variable: 'OCP_TOKEN'
-                )]) {
-                    sh '''
-                    set -e
-                    oc login --token=$OCP_TOKEN --server=$OCP_SERVER --insecure-skip-tls-verify=true
-                    oc project $OCP_PROJECT
+stage('Deploy to Kind') {
+    steps {
+        sh '''
+        kubectl config use-context kind-devops-lab
 
-                    oc apply -f services/postgres/
+        kubectl apply -n nextgen -f services/postgres/
 
-                    ./scripts/render-manifest.sh services/apiservice/openshift.yaml $IMAGE_TAG | oc apply -f -
-                    ./scripts/render-manifest.sh services/authservice/openshift.yaml $IMAGE_TAG | oc apply -f -
-                    ./scripts/render-manifest.sh services/userservice/openshift.yaml $IMAGE_TAG | oc apply -f -
-                    ./scripts/render-manifest.sh services/frontend/openshift.yaml $IMAGE_TAG | oc apply -f -
-                    '''
-                }
-            }
-        }
-
+        ./scripts/render-manifest.sh services/apiservice/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
+        ./scripts/render-manifest.sh services/authservice/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
+        ./scripts/render-manifest.sh services/userservice/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
+        ./scripts/render-manifest.sh services/frontend/k8s.yaml $IMAGE_TAG | kubectl apply -n nextgen -f -
+        '''
+    }
+}
         stage('Verify Rollout') {
             steps {
                 sh '''

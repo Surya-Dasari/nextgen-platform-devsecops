@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice
+  labels:
+    app: authservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authservice
+  template:
+    metadata:
+      labels:
+        app: authservice
+    spec:
+      containers:
+        - name: authservice
+          image: docker.io/suryadasari31/nextgen-authservice:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9001
+          env:
+            - name: USERSERVICE_URL
+              value: http://userservice:9002
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice
+spec:
+  selector:
+    app: authservice
+  ports:
+    - name: http
+      port: 9001
+      targetPort: 9001
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: authservice
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: authservice.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: authservice
+                port:
+                  number: 9001
