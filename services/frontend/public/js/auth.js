@@ -7,20 +7,29 @@ function login() {
 
   fetch(`${API}/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       username: username,
       password: password
     })
   })
-  .then(r => r.text())
-  .then(t => {
-    if (t.startsWith("ey")) {
-      localStorage.setItem("token", t);
-      window.location.href = "welcome.html";
-    } else {
-      msg.innerText = t;
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Invalid username or password");
     }
+    return response.text();
+  })
+  .then(token => {
+    console.log("TOKEN:", token);
+
+    localStorage.setItem("token", token);
+
+    window.location.href = "welcome.html";
+  })
+  .catch(err => {
+    msg.innerText = err.message;
   });
 }
 
@@ -31,7 +40,9 @@ function signup() {
 
   fetch(`${API}/signup`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       username: username,
       password: password
