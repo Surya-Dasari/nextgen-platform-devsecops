@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     KUBECTL     = "/usr/local/bin/kubectl"
     DOCKER_REPO = "docker.io/suryadasari31"
@@ -115,6 +114,6 @@ post {
         echo "CI/CD FAILED – Check Jenkins logs"
     }
 }
-```
+
 
 }
