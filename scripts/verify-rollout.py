@@ -2,6 +2,7 @@ import subprocess
 import sys
 
 NAMESPACE = "nextgen"
+KUBECTL = "/usr/local/bin/kubectl"
 
 deployments = [
     "apiservice",
@@ -14,7 +15,7 @@ for d in deployments:
     print(f"⏳ Waiting for rollout: {d}")
     result = subprocess.run(
         [
-            "kubectl",
+            KUBECTL,
             "rollout",
             "status",
             f"deployment/{d}",
