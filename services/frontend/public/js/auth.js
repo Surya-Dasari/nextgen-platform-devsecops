@@ -1,4 +1,4 @@
-const API = "https://apiservice-suryadasari31-dev.apps.rm2.thpm.p1.openshiftapps.com";
+const API = "http://localhost:9000/signup";
 
 function login() {
   fetch(`${API}/login`, {
