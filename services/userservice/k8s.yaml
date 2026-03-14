@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: userservice
-          image: docker.io/suryadasari31/nextgen-userservice:latest
+          image: docker.io/suryadasari31/nextgen-userservice:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 9002

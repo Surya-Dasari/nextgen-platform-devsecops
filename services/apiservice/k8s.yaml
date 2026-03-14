@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: apiservice
-          image: docker.io/suryadasari31/nextgen-apiservice:latest
+          image: docker.io/suryadasari31/nextgen-apiservice:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 9000

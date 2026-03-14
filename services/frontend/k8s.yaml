@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: nextgen-ui
-          image: docker.io/suryadasari31/nextgen-frontend:latest
+          image: docker.io/suryadasari31/nextgen-frontend:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 9080

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: authservice
-          image: docker.io/suryadasari31/nextgen-authservice:latest
+          image: docker.io/suryadasari31/nextgen-authservice:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 9001
