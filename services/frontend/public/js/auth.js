@@ -1,12 +1,16 @@
 const API = "http://localhost:9000";
 
 function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("msg");
+
   fetch(`${API}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: username.value,
-      password: password.value
+      username: username,
+      password: password
     })
   })
   .then(r => r.text())
@@ -21,12 +25,16 @@ function login() {
 }
 
 function signup() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("msg");
+
   fetch(`${API}/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: username.value,
-      password: password.value
+      username: username,
+      password: password
     })
   })
   .then(r => r.text())
