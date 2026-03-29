@@ -14,5 +14,6 @@ public class UserProducer {
 
     public void sendUserEvent(String userJson) {
         kafkaTemplate.send("user-events", userJson);
+        System.out.println("Sent to Kafka: " + userJson);
     }
 }
