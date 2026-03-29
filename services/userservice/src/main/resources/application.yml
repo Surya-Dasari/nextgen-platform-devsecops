@@ -10,6 +10,14 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  kafka:
+    bootstrap-servers: kafka.kafka.svc.cluster.local:9092
+    consumer:
+      group-id: user-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 server:
   port: 9002
 
@@ -22,4 +30,3 @@ management:
     health:
       probes:
         enabled: true
-
