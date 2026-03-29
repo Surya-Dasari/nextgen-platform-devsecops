@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nextgen-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: nextgen.rules
+    rules:
+
+    - alert: HighCPUUsage
+      expr: sum(rate(node_cpu_seconds_total{mode!="idle"}[5m])) > 4
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage detected"
+        description: "Cluster CPU usage exceeded threshold"
+
+    - alert: HighMemoryUsage
+      expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.80
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Memory usage above 80%"
+        description: "Cluster memory usage exceeded 80%"
+
+    - alert: PodCrashLooping
+      expr: increase(kube_pod_container_status_restarts_total{namespace="nextgen"}[2m]) > 1
+      for: 30s
+      labels:
+        severity: critical
+      annotations:
+        summary: "Pod restarting too frequently"
+        description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting repeatedly"
