@@ -11,6 +11,10 @@ tools {
     nodejs 'node18'
 }
 
+environment {
+    SONAR_HOST_URL = "http://172.25.233.203:9000"
+}
+
 stages {
 
     stage('Checkout') {
@@ -67,21 +71,19 @@ stages {
 
     stage('SonarQube Analysis') {
         steps {
-            withSonarQubeEnv('sonar') {
-                sh '''
-                set -e
-                for svc in apiservice authservice userservice
-                do
-                  echo "Running Sonar for $svc"
-                  cd services/$svc
-                  mvn sonar:sonar \
-                    -Dsonar.projectKey=nextgen-$svc \
-                    -Dsonar.host.url=$SONAR_HOST_URL \
-                    -Dsonar.login=$SONAR_TOKEN
-                  cd -
-                done
-                '''
-            }
+            sh '''
+            set -e
+            for svc in apiservice authservice userservice
+            do
+              echo "Running Sonar for $svc"
+              cd services/$svc
+              mvn sonar:sonar \
+                -Dsonar.projectKey=nextgen-$svc \
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.login=$SONAR_TOKEN
+              cd -
+            done
+            '''
         }
     }
 
