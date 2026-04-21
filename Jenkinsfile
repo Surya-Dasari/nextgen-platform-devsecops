@@ -186,9 +186,8 @@ EOF
             '''
         }
     }
-}
 
-stage('Build Docker Images') {
+    stage('Build Docker Images') {
     steps {
         sh '''
         set -e
@@ -228,6 +227,9 @@ stage('Trivy Scan') {
         '''
     }
 }
+
+}
+
 
 post {
     success {
