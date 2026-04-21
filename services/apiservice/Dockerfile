@@ -1,10 +1,12 @@
-FROM registry.access.redhat.com/ubi8/openjdk-17-runtime
+FROM eclipse-temurin:17-jre
 
-WORKDIR /deployments
+WORKDIR /app
 
-COPY target/apiservice-0.0.1.jar app.jar
+COPY target/*.jar app.jar
+
+RUN useradd -m appuser
+USER appuser
 
 EXPOSE 9000
 
-ENTRYPOINT ["java","-jar","/deployments/app.jar"]
-
+ENTRYPOINT ["java","-jar","app.jar"]
