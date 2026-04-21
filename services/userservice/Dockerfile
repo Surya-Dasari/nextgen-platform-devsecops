@@ -1,10 +1,26 @@
-FROM registry.access.redhat.com/ubi8/openjdk-17-runtime
+# -------- BUILD STAGE --------
+FROM maven:3.9.9-eclipse-temurin-17 AS builder
 
-WORKDIR /deployments
+WORKDIR /build
 
-COPY target/userservice-0.0.1.jar app.jar
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-EXPOSE 9002
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-ENTRYPOINT ["java","-jar","/deployments/app.jar"]
 
+# -------- RUNTIME STAGE --------
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+COPY --from=builder /build/target/*.jar app.jar
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

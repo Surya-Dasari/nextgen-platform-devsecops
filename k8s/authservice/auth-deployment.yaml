@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice
+  labels:
+    app: authservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authservice
+  template:
+    metadata:
+      labels:
+        app: authservice
+    spec:
+      containers:
+      - name: authservice
+        image: 890337545995.dkr.ecr.ap-south-1.amazonaws.com/authservice:latest
+        ports:
+        - containerPort: 9001
+        env: 
+          - name: USERSERVICE_URL
+            value: http://userservice:9002
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice
+spec:
+  type: ClusterIP
+  selector:
+    app: authservice
+  ports:
+    - port: 9001
+      targetPort: 9001
