@@ -230,6 +230,21 @@ stage('Trivy Scan') {
     }
 }
 
+stage('Push to Quay') {
+    steps {
+        sh '''
+        set -e
+
+        echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
+
+        for img in apiservice authservice userservice frontend
+        do
+          docker tag nextgen-$img:latest quay.io/$QUAY_USER/nextgen-$img:latest
+          docker push quay.io/$QUAY_USER/nextgen-$img:latest
+        done
+        '''
+    }
+}
 }
 
 
