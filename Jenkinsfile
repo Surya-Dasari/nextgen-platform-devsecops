@@ -5,6 +5,10 @@ options {
     timestamps()
 }
 
+tools {
+    jdk 'jdk17'
+}
+
 stages {
 
     stage('Checkout') {
@@ -17,7 +21,7 @@ stages {
         steps {
             sh '''
             echo "Running Gitleaks scan..."
-            gitleaks detect --source . --no-banner
+            gitleaks detect --source . --config .gitleaks.toml --no-banner
             '''
         }
     }
