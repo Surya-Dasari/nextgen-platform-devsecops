@@ -1,0 +1,6 @@
+[allowlist]
+paths = [
+  '''deploy/base/authservice-sealed-secret.yaml''',
+  '''deploy/base/postgres-sealed-secret.yaml'''
+]
+
