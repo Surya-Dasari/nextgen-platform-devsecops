@@ -168,7 +168,7 @@ EOF
             do
               echo "Deploying \$svc"
               cd services/\$svc
-              mvn clean deploy -s \$WORKSPACE/settings.xml -DskipTests
+              mvn clean deploy -s "$WORKSPACE/settings.xml" -DskipTests
               cd -
             done
             """
