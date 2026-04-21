@@ -42,6 +42,28 @@ stages {
         }
     }
 
+    stage('Fetch Sonar Token') {
+        steps {
+            withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                script {
+                    def secret = sh(
+                        script: '''
+                        aws secretsmanager get-secret-value \
+                          --secret-id dev/sonar/token \
+                          --region ap-south-1 \
+                          --query SecretString \
+                          --output text
+                        ''',
+                        returnStdout: true
+                    ).trim()
+
+                    def json = readJSON text: secret
+                    env.SONAR_TOKEN = json.token
+                }
+            }
+        }
+    }
+
     stage('SonarQube Analysis') {
         steps {
             withSonarQubeEnv('sonar') {
@@ -54,7 +76,7 @@ stages {
                   mvn sonar:sonar \
                     -Dsonar.projectKey=nextgen-$svc \
                     -Dsonar.host.url=$SONAR_HOST_URL \
-                    -Dsonar.login=$SONAR_AUTH_TOKEN
+                    -Dsonar.login=$SONAR_TOKEN
                   cd -
                 done
                 '''
