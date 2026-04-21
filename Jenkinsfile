@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 options {
     timestamps()
 }
@@ -58,7 +57,6 @@ post {
         echo "CI failed"
     }
 }
-```
 
 }
 
