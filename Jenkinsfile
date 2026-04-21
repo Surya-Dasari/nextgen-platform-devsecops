@@ -48,7 +48,6 @@ stages {
             set -e
             cd services/frontend
             npm install
-            npm run build
             '''
         }
     }
