@@ -13,6 +13,7 @@ tools {
 
 environment {
     SONAR_HOST_URL = "http://172.25.233.203:9000"
+    NEXUS_URL = "http://localhost:8081/repository/maven-releases/"
 }
 
 stages {
@@ -47,11 +48,12 @@ stages {
         }
     }
 
-    stage('Fetch Sonar Token') {
+    stage('Fetch AWS Secrets') {
         steps {
             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                 script {
-                    def secret = sh(
+                    // Fetch Sonar token
+                    def sonarSecret = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
                           --secret-id dev/sonar/token \
@@ -62,8 +64,24 @@ stages {
                         returnStdout: true
                     ).trim()
 
-                    def json = readJSON text: secret
-                    env.SONAR_TOKEN = json.token
+                    def sonarJson = readJSON text: sonarSecret
+                    env.SONAR_TOKEN = sonarJson.token
+
+                    // Fetch Nexus credentials
+                    def nexusSecret = sh(
+                        script: '''
+                        aws secretsmanager get-secret-value \
+                          --secret-id dev/nexus/creds \
+                          --region ap-south-1 \
+                          --query SecretString \
+                          --output text
+                        ''',
+                        returnStdout: true
+                    ).trim()
+
+                    def nexusJson = readJSON text: nexusSecret
+                    env.NEXUS_USER = nexusJson.username
+                    env.NEXUS_PASS = nexusJson.password
                 }
             }
         }
@@ -112,6 +130,37 @@ stages {
                     }
                 }
             }
+        }
+    }
+
+    stage('Publish to Nexus') {
+        steps {
+            sh '''
+            set -e
+
+            cat > settings.xml <<EOF
+
+
+<settings>
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+  </servers>
+</settings>
+EOF
+
+
+            for svc in apiservice authservice userservice
+            do
+              echo "Publishing $svc to Nexus"
+              cd services/$svc
+              mvn deploy -s ../../settings.xml -DskipTests
+              cd -
+            done
+            '''
         }
     }
 
