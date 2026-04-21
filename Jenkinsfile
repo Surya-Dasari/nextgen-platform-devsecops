@@ -1,6 +1,7 @@
 pipeline {
 agent any
 
+
 options {
     timestamps()
 }
@@ -84,10 +85,30 @@ stages {
         }
     }
 
-    stage('Quality Gate') {
+    stage('Quality Gate (Manual)') {
         steps {
-            timeout(time: 3, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
+            script {
+                sleep(time: 10, unit: 'SECONDS')
+
+                for (svc in ['apiservice', 'authservice', 'userservice']) {
+
+                    echo "Checking Quality Gate for ${svc}"
+
+                    def status = sh(
+                        script: """
+                        curl -s -u $SONAR_TOKEN: \
+                        "$SONAR_HOST_URL/api/qualitygates/project_status?projectKey=nextgen-${svc}" \
+                        | jq -r .projectStatus.status
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Quality Gate Status for ${svc}: ${status}"
+
+                    if (status != "OK") {
+                        error "Quality Gate failed for ${svc}"
+                    }
+                }
             }
         }
     }
@@ -112,5 +133,5 @@ post {
     }
 }
 
-}
 
+}
