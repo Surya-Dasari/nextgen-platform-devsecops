@@ -26,7 +26,6 @@ stages {
     stage('Gitleaks Scan') {
         steps {
             sh '''
-            echo "Running Gitleaks scan..."
             gitleaks detect --source . --config .gitleaks.toml --no-banner
             '''
         }
@@ -38,7 +37,6 @@ stages {
             set -e
             for svc in apiservice authservice userservice
             do
-              echo "Building $svc"
               cd services/$svc
               mvn clean package -DskipTests
               cd -
@@ -52,8 +50,8 @@ stages {
             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                 script {
 
-                    // ---------- SONAR ----------
-                    def sonarSecret = sh(
+                    // -------- SONAR --------
+                    def sonarRaw = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
                           --secret-id dev/sonar/token \
@@ -64,14 +62,19 @@ stages {
                         returnStdout: true
                     ).trim()
 
-                    def sonarJson = readJSON text: sonarSecret
+                    def sonarJson = readJSON text: sonarRaw
                     if (sonarJson instanceof String) {
                         sonarJson = readJSON text: sonarJson
                     }
+
+                    if (!sonarJson.token) {
+                        error "Sonar token missing from AWS secret"
+                    }
+
                     env.SONAR_TOKEN = "${sonarJson.token}"
 
-                    // ---------- NEXUS ----------
-                    def nexusSecret = sh(
+                    // -------- NEXUS --------
+                    def nexusRaw = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
                           --secret-id dev/nexus/creds \
@@ -82,10 +85,15 @@ stages {
                         returnStdout: true
                     ).trim()
 
-                    def nexusJson = readJSON text: nexusSecret
+                    def nexusJson = readJSON text: nexusRaw
                     if (nexusJson instanceof String) {
                         nexusJson = readJSON text: nexusJson
                     }
+
+                    if (!nexusJson.username || !nexusJson.password) {
+                        error "Nexus credentials missing from AWS secret"
+                    }
+
                     env.NEXUS_USER = "${nexusJson.username}"
                     env.NEXUS_PASS = "${nexusJson.password}"
                 }
@@ -99,7 +107,6 @@ stages {
             set -e
             for svc in apiservice authservice userservice
             do
-              echo "Running Sonar for $svc"
               cd services/$svc
               mvn sonar:sonar \
                 -Dsonar.projectKey=nextgen-$svc \
@@ -114,12 +121,9 @@ stages {
     stage('Quality Gate (Manual)') {
         steps {
             script {
-                sleep(time: 10, unit: 'SECONDS')
+                sleep 10
 
-                for (svc in ['apiservice', 'authservice', 'userservice']) {
-
-                    echo "Checking Quality Gate for ${svc}"
-
+                for (svc in ['apiservice','authservice','userservice']) {
                     def status = sh(
                         script: """
                         curl -s -u $SONAR_TOKEN: \
@@ -128,8 +132,6 @@ stages {
                         """,
                         returnStdout: true
                     ).trim()
-
-                    echo "Quality Gate Status for ${svc}: ${status}"
 
                     if (status != "OK") {
                         error "Quality Gate failed for ${svc}"
@@ -144,9 +146,9 @@ stages {
             sh """
             set -e
 
-            echo "Creating Maven settings.xml"
+            SETTINGS="\$WORKSPACE/settings.xml"
 
-            cat > settings.xml <<EOF
+            cat > "\$SETTINGS" <<EOF
 
 
 <settings>
@@ -166,13 +168,10 @@ stages {
 EOF
 
 
-            echo "Publishing artifacts to Nexus..."
-
             for svc in apiservice authservice userservice
             do
-              echo "Deploying \$svc"
               cd services/\$svc
-              mvn clean deploy -s "\$WORKSPACE/settings.xml" -DskipTests
+              mvn clean deploy -s "\$SETTINGS" -DskipTests
               cd -
             done
             """
@@ -182,7 +181,6 @@ EOF
     stage('Build Frontend') {
         steps {
             sh '''
-            set -e
             cd services/frontend
             npm install
             '''
