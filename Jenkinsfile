@@ -51,7 +51,8 @@ stages {
         steps {
             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                 script {
-                    // Fetch Sonar token
+
+                    // ---------- SONAR ----------
                     def sonarSecret = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
@@ -64,9 +65,12 @@ stages {
                     ).trim()
 
                     def sonarJson = readJSON text: sonarSecret
-                    env.SONAR_TOKEN = sonarJson.token
+                    if (sonarJson instanceof String) {
+                        sonarJson = readJSON text: sonarJson
+                    }
+                    env.SONAR_TOKEN = "${sonarJson.token}"
 
-                    // Fetch Nexus credentials
+                    // ---------- NEXUS ----------
                     def nexusSecret = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
@@ -79,8 +83,11 @@ stages {
                     ).trim()
 
                     def nexusJson = readJSON text: nexusSecret
-                    env.NEXUS_USER = nexusJson.username
-                    env.NEXUS_PASS = nexusJson.password
+                    if (nexusJson instanceof String) {
+                        nexusJson = readJSON text: nexusJson
+                    }
+                    env.NEXUS_USER = "${nexusJson.username}"
+                    env.NEXUS_PASS = "${nexusJson.password}"
                 }
             }
         }
@@ -159,16 +166,13 @@ stages {
 EOF
 
 
-            echo "---- settings.xml ----"
-            cat settings.xml
-
             echo "Publishing artifacts to Nexus..."
 
             for svc in apiservice authservice userservice
             do
               echo "Deploying \$svc"
               cd services/\$svc
-              mvn clean deploy -s "$WORKSPACE/settings.xml" -DskipTests
+              mvn clean deploy -s "\$WORKSPACE/settings.xml" -DskipTests
               cd -
             done
             """
