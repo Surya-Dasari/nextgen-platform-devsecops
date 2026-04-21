@@ -13,7 +13,6 @@ tools {
 
 environment {
     SONAR_HOST_URL = "http://172.25.233.203:9000"
-    NEXUS_URL = "http://localhost:8081/repository/maven-releases/"
 }
 
 stages {
@@ -52,7 +51,7 @@ stages {
         steps {
             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                 script {
-                    // Fetch Sonar token
+                    // Sonar Token
                     def sonarSecret = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
@@ -67,7 +66,7 @@ stages {
                     def sonarJson = readJSON text: sonarSecret
                     env.SONAR_TOKEN = sonarJson.token
 
-                    // Fetch Nexus credentials
+                    // Nexus Credentials
                     def nexusSecret = sh(
                         script: '''
                         aws secretsmanager get-secret-value \
@@ -135,8 +134,10 @@ stages {
 
     stage('Publish to Nexus') {
         steps {
-            sh '''
+            sh """
             set -e
+
+            echo "Creating Maven settings.xml"
 
             cat > settings.xml <<EOF
 
@@ -144,7 +145,12 @@ stages {
 <settings>
   <servers>
     <server>
-      <id>nexus</id>
+      <id>nexus-releases</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+    <server>
+      <id>nexus-snapshots</id>
       <username>${NEXUS_USER}</username>
       <password>${NEXUS_PASS}</password>
     </server>
@@ -153,14 +159,16 @@ stages {
 EOF
 
 
+            echo "Publishing artifacts to Nexus..."
+
             for svc in apiservice authservice userservice
             do
-              echo "Publishing $svc to Nexus"
-              cd services/$svc
-              mvn deploy -s ../../settings.xml -DskipTests
+              echo "Deploying \$svc"
+              cd services/\$svc
+              mvn clean deploy -s ../../settings.xml -DskipTests
               cd -
             done
-            '''
+            """
         }
     }
 
