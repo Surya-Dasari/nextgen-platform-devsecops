@@ -46,17 +46,10 @@ stages {
         steps {
             withSonarQubeEnv('sonar') {
                 sh '''
-                set -e
-                for svc in apiservice authservice userservice
-                do
-                  echo "Running Sonar for $svc"
-                  cd services/$svc
                   mvn sonar:sonar \
-                    -Dsonar.projectKey=$svc \
+                    -Dsonar.projectKey=nextgen \
                     -Dsonar.host.url=$SONAR_HOST_URL \
                     -Dsonar.login=$SONAR_AUTH_TOKEN
-                  cd -
-                done
                 '''
             }
         }
