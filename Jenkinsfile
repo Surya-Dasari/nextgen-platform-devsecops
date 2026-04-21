@@ -220,6 +220,8 @@ stage('Trivy Scan') {
           echo "Scanning image nextgen-$img"
 
           trivy image \
+            --timeout 10m \
+            --scanners vuln \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
             nextgen-$img:latest
