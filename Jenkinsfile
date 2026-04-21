@@ -7,6 +7,7 @@ options {
 
 tools {
     jdk 'jdk17'
+    nodejs 'node18'
 }
 
 stages {
