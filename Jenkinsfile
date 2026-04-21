@@ -188,6 +188,47 @@ EOF
     }
 }
 
+stage('Build Docker Images') {
+    steps {
+        sh '''
+        set -e
+
+        for svc in apiservice authservice userservice
+        do
+          echo "Building image for $svc"
+          cd services/$svc
+
+          docker build -t nextgen-$svc:latest .
+
+          cd -
+        done
+
+        echo "Building frontend image"
+        cd services/frontend
+        docker build -t nextgen-frontend:latest .
+        cd -
+        '''
+    }
+}
+
+stage('Trivy Scan') {
+    steps {
+        sh '''
+        set -e
+
+        for img in apiservice authservice userservice frontend
+        do
+          echo "Scanning image nextgen-$img"
+
+          trivy image \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            nextgen-$img:latest
+        done
+        '''
+    }
+}
+
 post {
     success {
         echo "CI completed successfully"
