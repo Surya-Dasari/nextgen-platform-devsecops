@@ -232,21 +232,42 @@ stage('Trivy Scan') {
 
 stage('Push to Quay') {
     steps {
-        script {
-            sh """
-            set -e
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+            script {
 
-            echo "Logging into Quay..."
+                def quayRaw = sh(
+                    script: '''
+                    aws secretsmanager get-secret-value \
+                      --secret-id dev/quay/creds \
+                      --region ap-south-1 \
+                      --query SecretString \
+                      --output text
+                    ''',
+                    returnStdout: true
+                ).trim()
 
-            echo "\$QUAY_PASS" | docker login quay.io -u "\$QUAY_USER" --password-stdin
+                def quayJson = readJSON text: quayRaw
+                if (quayJson instanceof String) {
+                    quayJson = readJSON text: quayJson
+                }
 
-            for img in apiservice authservice userservice frontend
-            do
-              echo "Pushing \$img"
-              docker tag nextgen-\$img:latest quay.io/suryadasari31/nextgen-\$img:latest
-              docker push quay.io/suryadasari31/nextgen-\$img:latest
-            done
-            """
+                def QUAY_USER = quayJson.username
+                def QUAY_PASS = quayJson.password
+
+                sh """
+                set -e
+
+                echo "Logging into Quay..."
+
+                echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
+
+                for img in apiservice authservice userservice frontend
+                do
+                  docker tag nextgen-\$img:latest quay.io/suryadasari31/nextgen-\$img:latest
+                  docker push quay.io/suryadasari31/nextgen-\$img:latest
+                done
+                """
+            }
         }
     }
 }
