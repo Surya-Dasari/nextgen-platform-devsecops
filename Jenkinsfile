@@ -140,37 +140,42 @@ stage('Push to Quay') {
 }
 
 stage('Update GitOps Repo') {
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: 'github-creds',
-            usernameVariable: 'GIT_USER',
-            passwordVariable: 'GIT_PASS'
-        )]) {
-            sh '''
-            set -e
+steps {
+withCredentials([usernamePassword(
+credentialsId: 'github-creds',
+usernameVariable: 'GIT_USER',
+passwordVariable: 'GIT_PASS'
+)]) {
+sh '''
+set -e
 
-            IMAGE_TAG=${BUILD_NUMBER}
 
-            yq -y -i '.userservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
-            yq -y -i '.authservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
-            yq -y -i '.apiservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
-            yq -y -i '.frontend.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        git fetch origin eks-env || true
+        git checkout eks-env
+        git pull origin eks-env
 
-            git config user.name "jenkins"
-            git config user.email "jenkins@local"
+        IMAGE_TAG=${BUILD_NUMBER}
 
-            git fetch origin eks-env || true
-            git checkout eks-env || git checkout -b eks-env
+        yq -y -i '.userservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.authservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.apiservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.frontend.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
 
-            git add nextgen-platform/values.yaml
-            git commit -m "Update image tags to $IMAGE_TAG" || echo "No changes"
+        git config user.name "jenkins"
+        git config user.email "jenkins@local"
 
-            git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/Surya-Dasari/nextgen-platform-devsecops.git
-            git push origin eks-env
-            '''
-        }
+        git add nextgen-platform/values.yaml
+        git commit -m "Update image tags to $IMAGE_TAG" || echo "No changes"
+
+        git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/Surya-Dasari/nextgen-platform-devsecops.git
+        git push origin eks-env
+        '''
     }
 }
+
+
+}
+
 }
 
 post {
