@@ -1,0 +1,8 @@
+postgres:
+  image: postgres:15
+  user: nextgenuser
+  password: nextgenpass
+  db: nextgendb
+  storage: 2Gi
+  port: 5432
+  storageClass: gp2
