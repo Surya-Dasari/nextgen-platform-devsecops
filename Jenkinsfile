@@ -146,10 +146,10 @@ stage('Update GitOps Repo') {
 
         IMAGE_TAG=${BUILD_NUMBER}
 
-        yq -i '.userservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
-        yq -i '.authservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
-        yq -i '.apiservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
-        yq -i '.frontend.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.userservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.authservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.apiservice.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
+        yq -y -i '.frontend.tag = "'"$IMAGE_TAG"'"' nextgen-platform/values.yaml
 
         git config user.name "jenkins"
         git config user.email "jenkins@local"
