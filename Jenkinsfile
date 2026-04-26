@@ -150,9 +150,10 @@ sh '''
 set -e
 
 
-        git fetch origin eks-env || true
-        git checkout eks-env
-        git pull origin eks-env
+        #  Always sync cleanly with remote
+        git fetch origin eks-env
+        git checkout -B eks-env origin/eks-env
+        git reset --hard origin/eks-env
 
         IMAGE_TAG=${BUILD_NUMBER}
 
