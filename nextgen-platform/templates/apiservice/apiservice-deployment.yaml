@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apiservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apiservice
+  template:
+    metadata:
+      labels:
+        app: apiservice
+    spec:
+      containers:
+        - name: apiservice
+          image: "{{ .Values.apiservice.image }}:{{ .Values.apiservice.tag }}"
+          ports:
+            - containerPort: {{ .Values.apiservice.port }}
+          env:
+            - name: AUTH_SERVICE_URL
+              value: {{ .Values.apiservice.authUrl }}
+            - name: USER_SERVICE_URL
+              value: {{ .Values.apiservice.userUrl }}

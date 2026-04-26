@@ -7,6 +7,6 @@ COPY target/*.jar app.jar
 RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
 USER appuser
 
-EXPOSE 8080
+EXPOSE 9001
 
 ENTRYPOINT ["java","-jar","app.jar"]

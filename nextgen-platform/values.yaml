@@ -6,3 +6,25 @@ postgres:
   storage: 2Gi
   port: 5432
   storageClass: gp2
+userservice:
+  image: quay.io/suryadasari31/nextgen-userservice
+  tag: v1
+  port: 9002
+
+authservice:
+  image: quay.io/suryadasari31/nextgen-authservice
+  tag: v1
+  port: 9001
+  userserviceUrl: http://userservice:9002
+
+apiservice:
+  image: quay.io/suryadasari31/nextgen-apiservice
+  tag: v1
+  port: 9000
+  authUrl: http://authservice:9001
+  userUrl: http://userservice:9002
+
+frontend:
+  image: quay.io/suryadasari31/nextgen-frontend
+  tag: v1
+  port: 9080

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authservice
+  template:
+    metadata:
+      labels:
+        app: authservice
+    spec:
+      containers:
+        - name: authservice
+          image: "{{ .Values.authservice.image }}:{{ .Values.authservice.tag }}"
+          ports:
+            - containerPort: {{ .Values.authservice.port }}
+          env:
+            - name: USERSERVICE_URL
+              value: {{ .Values.authservice.userserviceUrl }}
