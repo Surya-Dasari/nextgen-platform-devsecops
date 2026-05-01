@@ -3,8 +3,11 @@ kind: Ingress
 metadata:
   name: nextgen-ingress
   namespace: dev
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
+
   rules:
     - http:
         paths:
@@ -12,9 +15,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nextgen-ui
+                name: frontend
                 port:
-                  number: 9080
+                  number: 80
 
           - path: /api
             pathType: Prefix
