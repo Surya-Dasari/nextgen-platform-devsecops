@@ -14,6 +14,14 @@ spec:
     spec:
       containers:
         - name: userservice
-          image: "{{ .Values.userservice.image }}:{{ .Values.userservice.tag }}"
+          image: {{ .Values.userservice.image }}:{{ .Values.userservice.tag }}
           ports:
-            - containerPort: {{ .Values.userservice.port }}
+            - containerPort: 9002
+
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.userservice.env.SPRING_DATASOURCE_URL }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.userservice.env.SPRING_DATASOURCE_USERNAME }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ .Values.userservice.env.SPRING_DATASOURCE_PASSWORD }}
