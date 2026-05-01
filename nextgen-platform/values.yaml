@@ -8,7 +8,7 @@ postgres:
   storageClass: gp2
 userservice:
   image: quay.io/suryadasari31/nextgen-userservice
-  tag: '45'
+  tag: '46'
   port: 9002
   env:
     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nextgendb
@@ -16,20 +16,20 @@ userservice:
     SPRING_DATASOURCE_PASSWORD: nextgenpass
 authservice:
   image: quay.io/suryadasari31/nextgen-authservice
-  tag: '45'
+  tag: '46'
   port: 9001
   env:
     USERSERVICE_URL: http://userservice:9002
 apiservice:
   image: quay.io/suryadasari31/nextgen-apiservice
-  tag: '45'
+  tag: '46'
   port: 9000
   env:
     AUTH_SERVICE_URL: http://authservice:9001
     USER_SERVICE_URL: http://userservice:9002
 frontend:
   image: quay.io/suryadasari31/nextgen-frontend
-  tag: '45'
+  tag: '46'
   port: 9080
   env:
     API_URL: http://ab3aa5728c0564cc2ae6bf82528693fc-7ce7b67a2c9fb810.elb.ap-south-1.amazonaws.com/api
