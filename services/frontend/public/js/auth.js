@@ -1,4 +1,5 @@
-const API = "http://localhost:9000";
+const API = window.location.origin + "/api";
+
 
 function login() {
   fetch(`${API}/login`, {
