@@ -3,10 +3,8 @@ kind: Ingress
 metadata:
   name: nextgen-ingress
   namespace: dev
-
 spec:
   ingressClassName: nginx
-
   rules:
     - http:
         paths:
@@ -17,7 +15,6 @@ spec:
                 name: frontend
                 port:
                   number: 80
-
           - path: /api
             pathType: Prefix
             backend:
