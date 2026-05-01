@@ -40,4 +40,4 @@ frontend:
   port: 9080
 
   env:
-    API_URL: http://apiservice:9000
+    API_URL: http://ab3aa5728c0564cc2ae6bf82528693fc-7ce7b67a2c9fb810.elb.ap-south-1.amazonaws.com/api
